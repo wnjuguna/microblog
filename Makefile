@@ -3,4 +3,4 @@ setup:
 	. ~/.microblog/bin/activate && \
 	pip install --upgrade pip && \
 	pip install ansible && \
-	pip install -r requirements.txt
+	pip install -r src/requirements.txt
