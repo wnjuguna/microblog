@@ -1,0 +1,33 @@
+---
+- name: "Install linting tools"
+  package:
+    name:
+      - haskell-platform
+    state: present
+  tags: lint
+
+- name: "Check if stack tool is installed"
+  stat:
+    path: /usr/local/bin/stack
+  register: stack_tool
+  tags: lint
+
+- name: "Download haskell stack tool"
+  get_url:
+    url: https://get.haskellstack.org/
+    dest: ~/stack_tool.sh
+    mode: 0755
+  when: not stack_tool.stat.exists
+  tags: lint
+
+- name: "Install haskell stack tool"
+  shell:
+    cmd: sh ~/stack_tool.sh
+  when: not stack_tool.stat.exists
+  tags: lint
+
+- name: "Upgrading stack tool"
+  shell:
+    cmd: /usr/local/bin/stack upgrade --binary-only
+  when: not stack_tool.stat.exists
+  tags: lint
