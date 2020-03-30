@@ -1,47 +1,40 @@
 ---
-- name: "Install linting tools"
-  package:
+- name: "Install Docker"
+  apt:
     name:
-      - haskell-platform
+      - docker-ce
+      - docker-ce-cli
+      - python3-docker
     state: present
+    update_cache: yes
   tags: lint
 
-- name: "Check if stack tool is installed"
-  stat:
-    path: /usr/local/bin/stack
-  register: stack_tool
+- name: "Systemd enable docker"
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
   tags: lint
 
-- name: "Download haskell stack tool"
-  get_url:
-    url: https://get.haskellstack.org/
-    dest: ~/stack_tool.sh
-    mode: 0755
-  when: not stack_tool.stat.exists
+- name: "Check if jenkins user exists"
+  getent:
+    database: passwd
+    key: jenkins
+    fail_key: no
+  register: jenkins_user
   tags: lint
 
-- name: "Install haskell stack tool"
-  shell:
-    cmd: sh ~/stack_tool.sh
-  when: not stack_tool.stat.exists
+- name: "Add Jenkins user"
+  user:
+    name: jenkins
+    append: yes
+    groups:
+      - docker
+  when: not getent_passwd['jenkins']
   tags: lint
 
-- name: "Upgrading stack tool"
-  shell:
-    cmd: /usr/local/bin/stack upgrade --binary-only
-  when: not stack_tool.stat.exists
+- name: "Fetch Hadolint docker image"
+  docker_image:
+    name: hadolint/hadolint
+    source: pull
   tags: lint
-  
-- name: "Fetch Hadolint repository"
-  git:
-    repo: https://github.com/hadolint/hadolint
-    dest: ~/hadolint
-  tags: lint
-  
-- name: "Install Hadolint"
-  become: no
-  shell:
-    cmd: /usr/local/bin/stack install
-    chdir: ~/hadolint
-  tags: lint
-    
