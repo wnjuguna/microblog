@@ -1,6 +1,5 @@
 ---
 - name: "Install Python3 and Docker dependencies on host"
-  become: yes
   apt:
     name:
       - python3-apt
@@ -20,7 +19,6 @@
   tags: lint
 
 - name: "Add docker repo to apt"
-  become: yes
   apt_repository:
     repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
     filename: docker
@@ -29,7 +27,6 @@
   tags: lint
 
 - name: "Install Docker"
-  become: yes
   apt:
     name:
       - docker-ce
@@ -38,34 +35,22 @@
     update_cache: yes
   tags: lint
 
-- name: "Systemd enable docker"
-  become: yes
-  systemd:
-    name: docker
-    enabled: yes
-    state: started
-  tags: lint
-
-- name: "Check if jenkins user exists"
-  getent:
-    database: passwd
-    key: jenkins
-    fail_key: no
-  register: jenkins_user
-  tags: lint
-
-- name: "Add Jenkins user"
-  become: yes
+- name: "Create Jenkins user"
   user:
     name: jenkins
     append: yes
     groups:
       - docker
-  when: not getent_passwd['jenkins']
+  tags: lint
+
+- name: "Systemd enable docker"
+  systemd:
+    name: docker
+    enabled: yes
+    state: reloaded
   tags: lint
 
 - name: "Fetch Hadolint docker image"
-  become: yes
   docker_image:
     name: hadolint/hadolint
     source: pull
