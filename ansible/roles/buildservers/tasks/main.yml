@@ -17,7 +17,8 @@
 - name: "Add Docker repo key to apt"
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
-    
+  tags:lint
+  
 - name: "Add docker repo to apt"
   become: yes
   apt_repository:
