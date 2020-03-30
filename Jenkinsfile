@@ -13,5 +13,11 @@ pipeline {
       }
     }
 
+    stage('Build image') {
+      steps {
+        sh 'make build'
+      }
+    }
+
   }
 }
