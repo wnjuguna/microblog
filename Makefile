@@ -13,3 +13,7 @@ lint:
 	. ~/.microblog/bin/activate && \
 	ansible-lint ansible/site.yml -x 305 && \
 	docker run --rm -i hadolint/hadolint < Dockerfile
+
+build:
+	#Build microblog image
+	docker image build . -t microblog:latest
