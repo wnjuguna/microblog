@@ -1,14 +1,23 @@
 ---
-- name: "Install Python3 dependencies on host"
+- name: "Install Python3 and Docker dependencies on host"
   become: yes
   apt:
     name:
       - python3-apt
       - python3-docker
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
     state: present
     update_cache: yes
   tags: lint
 
+- name: "Add Docker repo key to apt"
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    
 - name: "Add docker repo to apt"
   become: yes
   apt_repository:
