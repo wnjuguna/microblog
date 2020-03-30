@@ -1,5 +1,6 @@
 ---
 - name: "Add docker repo to apt"
+  become: yes
   apt_repository:
     repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
     filename: docker
@@ -8,6 +9,7 @@
   tags: lint
 
 - name: "Install Docker"
+  become: yes
   apt:
     name:
       - docker-ce
@@ -18,6 +20,7 @@
   tags: lint
 
 - name: "Systemd enable docker"
+  become: yes
   systemd:
     name: docker
     enabled: yes
@@ -33,6 +36,7 @@
   tags: lint
 
 - name: "Add Jenkins user"
+  become: yes
   user:
     name: jenkins
     append: yes
@@ -42,6 +46,7 @@
   tags: lint
 
 - name: "Fetch Hadolint docker image"
+  become: yes
   docker_image:
     name: hadolint/hadolint
     source: pull
