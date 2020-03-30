@@ -1,9 +1,10 @@
 ---
 - name: "Add docker repo to apt"
-  apt_repo:
+  apt_repository:
     repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+    filename: docker
     state: present
-    update: yes
+    update_cache: yes
   tags: lint
 
 - name: "Install Docker"
