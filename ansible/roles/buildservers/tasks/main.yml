@@ -39,6 +39,7 @@
   tags: lint
   
 - name: "Install Hadolint"
+  become: no
   shell:
     cmd: /usr/local/bin/stack install
     chdir: ~/hadolint
