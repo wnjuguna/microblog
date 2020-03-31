@@ -1,9 +1,13 @@
 ---
+- ec2_metadata_facts:
+  tags: push
+
 - name: "Install Python3 and Docker dependencies on host"
   apt:
     name:
       - python3-apt
       - python3-docker
+      - python3-boto3
       - apt-transport-https
       - ca-certificates
       - curl
@@ -66,3 +70,13 @@
       path: ../
       pull: yes
   tags: build
+
+- name: "Create ECR repository"
+  ecs_ecr:
+    aws_access_key: ansible_ec2_iam_security_credentials__accesskeyid
+    aws_secret_key: ansible_ec2_iam_security_credentials__secretaccesskey
+    security_token: ansible_ec2_iam_security_credentials__token
+    name: udacity/microblog
+    state: present
+    region: us-west-2
+  tags: push
