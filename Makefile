@@ -6,7 +6,7 @@ setup:
 	pip install ansible && \
 	pip install ansible-lint && \
 	pip install -r src/requirements.txt && \
-	ansible-playbook -vv -i ansible/buildserver ansible/site.yml --tags lint
+	ansible-playbook -vv -i ansible/buildserver ansible/site.yml --tags setup
 
 lint:
 	#Ansible and Dockerfile linting
@@ -16,4 +16,5 @@ lint:
 
 build:
 	#Build microblog image
+	. ~/.microblog/bin/activate && \
 	ansible-playbook -i ansible/buildserver ansible/site.yml --tags build

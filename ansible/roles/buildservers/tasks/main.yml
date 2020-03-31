@@ -11,12 +11,12 @@
       - software-properties-common
     state: present
     update_cache: yes
-  tags: lint
+  tags: setup
 
 - name: "Add Docker repo key to apt"
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
-  tags: lint
+  tags: setup
 
 - name: "Add docker repo to apt"
   apt_repository:
@@ -24,7 +24,7 @@
     filename: docker
     state: present
     update_cache: yes
-  tags: lint
+  tags: setup
 
 - name: "Install Docker"
   apt:
@@ -33,7 +33,7 @@
       - docker-ce-cli
     state: present
     update_cache: yes
-  tags: lint
+  tags: setup
 
 - name: "Create Jenkins user"
   user:
@@ -41,20 +41,20 @@
     append: yes
     groups:
       - docker
-  tags: lint
+  tags: setup
 
 - name: "Systemd enable docker"
   systemd:
     name: docker
     enabled: yes
     state: reloaded
-  tags: lint
+  tags: setup
 
 - name: "Fetch Hadolint docker image"
   docker_image:
     name: hadolint/hadolint
     source: pull
-  tags: lint
+  tags: setup
 
 - name: "Build microblog docker image"
   docker_image:
