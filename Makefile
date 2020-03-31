@@ -16,4 +16,4 @@ lint:
 
 build:
 	#Build microblog image
-	docker image build . -t microblog:latest
+	ansible-playbook -i ansible/buildserver ansible/site.yml --tags build

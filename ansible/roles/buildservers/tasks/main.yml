@@ -55,3 +55,14 @@
     name: hadolint/hadolint
     source: pull
   tags: lint
+
+- name: "Build microblog docker image"
+  docker_image:
+    name: microblog
+    tag: latest
+    source: build
+    state: present
+    build:
+      path: ../
+      pull: yes
+  tags: build
