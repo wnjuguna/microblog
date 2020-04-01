@@ -114,7 +114,7 @@
 
 - name: "Get EC2 metadata facts"
   ec2_metadata_facts:
-  tags: build
+  tags: push
 
 - name: "Build microblog docker image"
   docker_image:
