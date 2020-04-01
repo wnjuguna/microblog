@@ -18,3 +18,8 @@ build:
 	#Build microblog image
 	. ~/.microblog/bin/activate && \
 	ansible-playbook -i ansible/buildserver ansible/site.yml --tags build
+
+push:
+	#Push docker image to ECR repository
+	. ~/.microblog/bin/activate && \
+	ansible-playbook -i ansible/buildserver ansible/site.yml --tags push

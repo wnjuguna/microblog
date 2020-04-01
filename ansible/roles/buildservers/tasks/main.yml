@@ -138,4 +138,13 @@
     name: udacity/microblog
     state: present
     region: "{{ ansible_facts.ec2_placement_region }}"
+  register: ecr_repo
   tags: build
+
+- name: "Push image to ECR"
+  docker_image:
+    repository: "{{ ecr_repo.repository.repositoryUri }}"
+    name: microblog
+    tag: latest
+    push: yes
+  tags: push
