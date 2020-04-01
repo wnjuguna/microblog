@@ -61,16 +61,17 @@
 
 - name: "Check if docker credential helper exists"
   stat:
-   path: /usr/local/bin/docker-credential-ecr-login
+    path: /usr/local/bin/docker-credential-ecr-login
   register: cred_helper
+  tags: setup
 
 - name: "Build amazon-ecr-credential-helper"
   become: yes
   become_user: jenkins
   shell:
     cmd: go get -u github.com/awslabs/amazon-ecr-credential-helper/ecr-login/cli/docker-credential-ecr-login
+  when: cred_helper.stat.exists == 'false'
   tags: setup
-  when: not cred_helper.exists
 
 - name: "Update facts"
   become: yes
