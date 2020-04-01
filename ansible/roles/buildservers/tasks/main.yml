@@ -147,4 +147,5 @@
     name: microblog
     tag: latest
     push: yes
+    source: local
   tags: push
