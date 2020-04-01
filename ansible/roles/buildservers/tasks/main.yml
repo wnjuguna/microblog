@@ -72,13 +72,17 @@
       pull: yes
   tags: build
 
+- name: "Request temporary credentials"
+  sts_session_token:
+  register: session_creds
+  tags: push
+
 - name: "Create ECR repository"
   ecs_ecr:
-    aws_access_key: "{{ ansible_facts['ansible_ec2_iam_security_credentials_' + ansible_facts.ansible_ec2_iam_instance_profile_role | regex_replace('-','_') + '_accesskeyid'] }}"
-    aws_secret_key: "{{ ansible_facts['ansible_ec2_iam_security_credentials_' + ansible_facts.ansible_ec2_iam_instance_profile_role | regex_replace('-','_') + '_secretaccesskey'] }}"
-    security_token: "{{ ansible_facts['ansible_ec2_iam_security_credentials_' + ansible_facts.ansible_ec2_iam_instance_profile_role | regex_replace('-','_') + '_token'] }}"
+    aws_access_key: "{{ session_creds.sts_creds.access_key }}"
+    aws_secret_key: "{{ session_creds.sts_creds.secret_key }}"
+    security_token: "{{ session_creds.sts_creds.session_token }}"
     name: udacity/microblog
     state: present
     region: us-west-2
-  when: defined "{{ ansible_facts.ansible_ec2_iam_instance_profile_role }}"
   tags: push
