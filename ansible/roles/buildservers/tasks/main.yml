@@ -78,7 +78,7 @@
   become_user: jenkins
   setup:
   tags: setup
-  
+
 - name: "Get EC2 metadata facts"
   ec2_metadata_facts:
   tags: setup
