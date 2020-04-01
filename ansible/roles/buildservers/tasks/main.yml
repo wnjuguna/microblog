@@ -79,10 +79,6 @@
   setup:
   tags: setup
 
-- name: "Get EC2 metadata facts"
-  ec2_metadata_facts:
-  tags: setup
-
 - name: "Install docker credential-helper"
   copy:
     src: "{{ ansible_user_dir }}/go/bin/docker-credential-ecr-login"
@@ -116,6 +112,10 @@
     source: pull
   tags: setup
 
+- name: "Get EC2 metadata facts"
+  ec2_metadata_facts:
+  tags: build
+
 - name: "Build microblog docker image"
   docker_image:
     name: microblog
@@ -129,7 +129,7 @@
 
 - name: "Request temporary credentials"
   sts_session_token:
-    region: "{{ hostvars['jenkins']['ansible_facts']['ansible_ec2_instance_identity_document_region'] }}"
+    region: "{{ ansible_facts.ansible_ec2_instance_identity_document_region }}"
   register: session_creds
   tags: build
 
@@ -140,5 +140,5 @@
     security_token: "{{ session_creds.sts_creds.session_token }}"
     name: udacity/microblog
     state: present
-    region: "{{ hostvars['jenkins']['ansible_facts']['ansible_ec2_instance_identity_document_region'] }}"
+    region: "{{ ansible_facts.ansible_ec2_instance_identity_document_region }}"
   tags: build
