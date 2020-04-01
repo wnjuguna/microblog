@@ -1,14 +1,11 @@
 ---
-- name: "Gather ec2 facts"
-  ec2_metadata_facts:
-  tags: push
-
 - name: "Install Python3 and Docker dependencies on host"
   apt:
     name:
       - python3-apt
       - python3-docker
       - python3-boto3
+      - golang-go
       - apt-transport-https
       - ca-certificates
       - curl
@@ -40,12 +37,19 @@
     update_cache: yes
   tags: setup
 
+- name: "Create Jenkins group"
+  group:
+    name: jenkins
+    state: present
+  tags: setup
+
 - name: "Create Jenkins user"
   user:
     name: jenkins
     append: yes
     groups:
       - docker
+      - jenkins
   tags: setup
 
 - name: "Systemd enable docker"
@@ -53,6 +57,46 @@
     name: docker
     enabled: yes
     state: reloaded
+  tags: setup
+
+- name: "Build amazon-ecr-credential-helper"
+  become: yes
+  become_user: jenkins
+  shell:
+    cmd: go get -u github.com/awslabs/amazon-ecr-credential-helper/ecr-login/cli/docker-credential-ecr-login
+  tags: setup
+
+- name: "Update facts"
+  become: yes
+  become_user: jenkins
+  setup:
+  tags: setup
+
+- name: "Install docker credential-helper"
+  copy:
+    src: "{{ ansible_user_dir }}/go/bin/docker-credential-ecr-login"
+    dest: /usr/local/bin/docker-credential-ecr-login
+    mode: '0755'
+    remote_src: yes
+  tags: setup
+
+- name: "Create docker-credential-helper directory"
+  file:
+    path: "{{ ansible_user_dir }}/.docker"
+    state: directory
+    mode: '0755'
+    owner: 'jenkins'
+    group: 'jenkins'
+  tags: setup
+
+- name: "Write docker-credential-helper config file"
+  become: yes
+  become_user: jenkins
+  copy:
+    content: '{ "credsStore": "ecr-login" }'
+    dest: "{{ ansible_user_dir }}/.docker/config.json"
+    mode: '0644'
+    remote_src: yes
   tags: setup
 
 - name: "Fetch Hadolint docker image"
@@ -75,7 +119,7 @@
 - name: "Request temporary credentials"
   sts_session_token:
   register: session_creds
-  tags: push
+  tags: build
 
 - name: "Create ECR repository"
   ecs_ecr:
@@ -85,4 +129,4 @@
     name: udacity/microblog
     state: present
     region: us-west-2
-  tags: push
+  tags: build
