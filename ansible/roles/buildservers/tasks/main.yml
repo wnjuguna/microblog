@@ -129,7 +129,7 @@
 
 - name: "Request temporary credentials"
   sts_session_token:
-    region: "{{ ansible_ec2_instance_identity_document_region }}"
+    region: "{{ ansible_facts.ansible_ec2_instance_identity_document_region }}"
   register: session_creds
   tags: build
 
@@ -140,5 +140,5 @@
     security_token: "{{ session_creds.sts_creds.session_token }}"
     name: udacity/microblog
     state: present
-    region: "{{ ansible_ec2_instance_identity_document_region }}"
+    region: "{{ ansible_facts.ansible_ec2_instance_identity_document_region }}"
   tags: build
