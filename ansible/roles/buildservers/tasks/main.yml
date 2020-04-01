@@ -139,7 +139,7 @@
     state: present
     region: "{{ ansible_facts.ec2_placement_region }}"
   register: ecr_repo
-  tags: build
+  tags: push
 
 - name: "Push image to ECR"
   docker_image:
