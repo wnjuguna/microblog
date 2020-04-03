@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "Template to deploy create VPC for K8s cluster"
+
+Parameters: 
+    VPCSubnet:
+        Type: String
+        Description: VPC subnet
+        Default: '10.10.10.0/16'
+        AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+        ConstraintDescription: Must be a valid subnet in cidr format
+
+    TrustedHosts:
+        Type: String
+        Description: Permit SSH access from trusted hosts only
+        Default: 0.0.0.0/0
+        AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+        ConstraintDescription: Must be a valid IP address or subnet in cidr format
+    
+    ClusterName: 
+        Description: EKS cluster name
+        Type: String
+        Default: 'eks-microblog'
+        AllowedPattern: ^[0-9A-Za-z][A-Za-z0-9\-_]*
+        ConstraintDescription: Must be a valid cluster name
+
+Resources:
+#Create VPC
+    VPC:
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock:
+                Ref: VPCSubnet
+
+#Internet Gateway               
+    InternetGW:
+        Type: AWS::EC2::InternetGateway
+
+    VPCGW:
+        Type: AWS::EC2::VPCGatewayAttachment
+        Properties:
+            VpcId:
+                Ref: VPC
+            InternetGatewayId:
+                Ref: InternetGW
+
+#AZ1 and AZ2 Public subnets                 
+    Subnet1:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId:
+                Ref: VPC
+            CidrBlock: !Select [0, !Cidr [ !GetAtt VPC.CidrBlock, 2, 14]]
+            AvailabilityZone: !Select [0, !GetAZs ""]
+            Tags:
+                - Key: !Sub 'kubernetes.io/cluster/${ClusterName}'
+                  Value: 'shared'                  
+    Subnet2:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId:
+                Ref: VPC
+            CidrBlock: !Select [1, !Cidr [ !GetAtt VPC.CidrBlock, 2, 14]]
+            AvailabilityZone: !Select [1, !GetAZs ""]
+            Tags:
+                - Key: !Sub 'kubernetes.io/cluster/${ClusterName}'
+                  Value: 'shared'
+
+#Route tables
+    PublicRT1:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: 
+                Ref: VPC
+
+#Default Route                
+    DefaultRoute:
+        Type: AWS::EC2::Route
+        Properties:
+            RouteTableId:
+                Ref: PublicRT1
+            DestinationCidrBlock: 0.0.0.0/0
+            GatewayId:
+                Ref: InternetGW
+
+#RouteTable Association
+    Subnet1Association:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties: 
+            RouteTableId: !Ref PublicRT1
+            SubnetId: !Ref Subnet1
+    Subnet2Association:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties: 
+            RouteTableId: !Ref PublicRT1
+            SubnetId: !Ref Subnet2
+  
+Outputs:
+    VPC:
+        Description: VPC ID created
+        Value: !Ref VPC
+    Subnets:
+        Description: List of VPC subnets created
+        Value: !Join [",", [!Ref Subnet1, !Ref Subnet2]]
