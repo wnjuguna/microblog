@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "Template to create K8s cluster on EKS"
+
+Parameters:
+    VPCId:
+        Type: String
+        Description: VPC Id
+        
+    ClusterName: 
+        Description: EKS cluster name
+        Type: String
+        Default: 'eks-microblog'
+        AllowedPattern: ^[0-9A-Za-z][A-Za-z0-9\-_]*
+        ConstraintDescription: Must be a valid cluster name
+
+    Subnets:
+        Type: "List<AWS::EC2::Subnet::Id>"
+        Description: EKS cluster control-plane subnets
+        ConstraintDescription: Must be a list of subnet ids
+
+    EKSClusterRoleName:
+        Description: EKS cluster name
+        Type: String
+        Default: 'eks-microblog'
+        AllowedPattern: ^[0-9A-Za-z][A-Za-z0-9\-_]*
+        ConstraintDescription: Must be a valid cluster name    
+
+Resources:
+
+#IAM Role
+    EKSClusterRole:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName: !Ref EKSClusterRoleName
+            Description: Allow EKS to provision cluster control plane 
+            AssumeRolePolicyDocument: 
+                Version: "2012-10-17"
+                Statement:
+                    Effect: Allow
+                    Principal:
+                        Service:
+                            - eks.amazonaws.com
+                    Action:
+                        - "sts:AssumeRole"            
+            ManagedPolicyArns: 
+                - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+                - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+
+#Cluster securitygroup
+    EKSSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Cluster communication with worker nodes.
+            VpcId: !Ref VPCId
+            
+#EKS cluster
+    EKSCluster:
+        Type: AWS::EKS::Cluster
+        Properties:
+          Name: !Ref ClusterName
+          ResourcesVpcConfig:
+              SecurityGroupIds:
+                  - !Ref EKSSecurityGroup
+              SubnetIds: !Ref Subnets                
+          RoleArn: !GetAtt EKSClusterRole.Arn
+
+Outputs:
+    ClusterName:
+        Description: Cluster name
+        Value: !Ref ClusterName
+        Export:
+            Name: !Sub "${AWS::StackName}-ClusterName"
+    ClusterEndpoint:
+        Description: Cluster API server endpoint
+        Value: !GetAtt EKSCluster.Endpoint
+        Export:
+            Name: !Sub "${AWS::StackName}-ClusterEndpoint"
