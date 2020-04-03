@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "Template to create microblog nodegroup on EKS"
+
+Parameters:
+    ClusterName:
+        Type: String
+        Description: EKS Cluster name
+        Default: eks-microblog
+        
+    EKSNodeGroupName:
+        Type: String
+        Description: Name of the Nodegroup
+        Default: microblog-nodegroup
+
+    ASGSubnets:
+        Type: "List<AWS::EC2::Subnet::Id>"
+        Description: AutoScaling group subnets
+        
+Resources:
+    EKSNodegroupRole:
+        Type: AWS::IAM::Role
+        Properties:            
+            RoleName: !Ref EKSNodeGroupName
+            Description: Allow Worker Nodes access to AWS apis 
+            AssumeRolePolicyDocument: 
+                Version: "2012-10-17"
+                Statement:
+                    Effect: Allow
+                    Principal:
+                        Service:
+                            - ec2.amazonaws.com
+                    Action:
+                        - "sts:AssumeRole"            
+            ManagedPolicyArns: 
+                - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+                - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+                - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly    
+
+    EKSNodegroup:
+        Type: AWS::EKS::Nodegroup
+        Properties: 
+            ClusterName: !Ref ClusterName
+            InstanceTypes: 
+                - t3.medium
+            NodegroupName: !Ref EKSNodeGroupName
+            NodeRole: !GetAtt EKSNodegroupRole.Arn
+            ScalingConfig: 
+                DesiredSize: 2
+                MaxSize: 4
+                MinSize: 2
+            Subnets: !Ref ASGSubnets
