@@ -5,13 +5,15 @@ setup:
 	pip install --upgrade pip && \
 	pip install ansible && \
 	pip install ansible-lint && \
+	pip install cfn-lint && \
 	pip install -r src/requirements.txt && \
 	ansible-playbook -vv -i ansible/buildserver ansible/site.yml --tags setup
 
 lint:
-	#Ansible and Dockerfile linting
+	#Ansible,Dockerfile and CFN linting
 	. ~/.microblog/bin/activate && \
 	ansible-lint ansible/site.yml -x 305 && \
+	cfn-lint --template cloudformation/*.yml && \
 	docker run --rm -i hadolint/hadolint < Dockerfile
 
 build:
