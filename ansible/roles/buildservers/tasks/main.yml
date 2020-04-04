@@ -177,6 +177,26 @@
   register: stack_outputs
   tags: deploy
 
+- set_fact: {{ stack_outputs | combine(stack_outputs) }}
+  tags: deploy
+  
+- name: Create k8s Cluster
+  cloudformation:
+      stack_name: microblog-cluster-stack
+      template: roles/buildservers/files/cloudformation/eks-cluster.yml
+      role_arn: "{{ ansible_facts.ec2_iam_info_instanceprofilearn | regex_replace('instance-profile', 'role') }}"
+      region: "{{ ansible_facts.ec2_placement_region }}"
+      state: present
+      template_parameters:
+          ClusterName: eks-microblog
+          VPCId: stack_outputs.VPC
+          Subnets: stack_outputs.Subnets
+  register: stack_outputs
+  tags: deploy
+
+- set_fact: {{ stack_outputs | combine(stack_outputs) }}
+  tags: deploy
+
 - name: "Gather EKS stack info"
   cloudformation_info:
       stack_name: microblog-vpc-stack
