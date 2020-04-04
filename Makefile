@@ -13,7 +13,7 @@ lint:
 	#Ansible,Dockerfile and CFN linting
 	. ~/.microblog/bin/activate && \
 	ansible-lint ansible/site.yml -x 305 && \
-	cfn-lint --template cloudformation/*.yml && \
+	cfn-lint --template ansible/roles/buildservers/files/cloudformation/*.yml && \
 	docker run --rm -i hadolint/hadolint < Dockerfile
 
 build:
