@@ -192,7 +192,7 @@
           ClusterName: eks-microblog
           VPCId: "{{ stack_outputs.VPC }}"
           Subnets: "{{ stack_outputs.Subnets }}"
-  register: ekc_cluster
+  register: eks_cluster
   tags: deploy
 
 - name: "Updating stack outputs"
