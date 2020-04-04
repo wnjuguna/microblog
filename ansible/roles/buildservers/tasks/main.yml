@@ -127,7 +127,9 @@
 
 - name: "Get EC2 metadata facts"
   ec2_metadata_facts:
-  tags: push
+  tags:
+    - push
+    - deploy
 
 - name: "Build microblog docker image"
   docker_image:
@@ -163,9 +165,26 @@
     source: local
   tags: push
 
+- name: "Gather facts as Jenkins user"
+  become: yes
+  become_user: jenkins
+  setup:
+  tags: deploy
+
 - name: "Gather EKS stack info"
   cloudformation_info:
       stack_name: microblog-eks
       region: "{{ ansible_facts.ec2_placement_region }}"
   register: eks_info
+  tags: deploy
+
+- name: "Deploy KubeConfig"
+  become: yes
+  become_user: jenkins
+  template:
+      src: kubeconfig.j2
+      dest: "{{ ansible_facts.ansible_user_dir + './kube/kubeconfig }}"
+      owner: jenkins
+      group: jenkins
+      mode: '0644'
   tags: deploy
