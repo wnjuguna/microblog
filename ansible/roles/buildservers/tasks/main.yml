@@ -190,8 +190,8 @@
       state: present
       template_parameters:
           ClusterName: eks-microblog
-          VPCId: stack_outputs.VPC
-          Subnets: stack_outputs.Subnets
+          VPCId: "{{ stack_outputs.VPC }}"
+          Subnets: "{{ stack_outputs.Subnets }}"
   register: stack_outputs
   tags: deploy
 
