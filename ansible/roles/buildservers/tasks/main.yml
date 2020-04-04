@@ -165,17 +165,29 @@
     source: local
   tags: push
 
-- name: "Gather facts as Jenkins user"
-  become: yes
-  become_user: jenkins
-  setup:
+- name: Create k8s VPC
+  cloudformation:
+      stack_name: microblog-vpc-stack
+      template: roles/buildservers/files/cloudformation/vpc.yml
+      role_arn: "{{ ansible_facts.ec2_iam_info_instanceprofilearn | regex_replace("instance-profile", "role") }}"
+      region: "{{ ansible_facts.ec2_placement_region }}"
+      state: present
+      template_parameters:
+          ClusterName: eks-microblog
+  register: stack_outputs
   tags: deploy
 
 - name: "Gather EKS stack info"
   cloudformation_info:
-      stack_name: microblog-eks
+      stack_name: microblog-vpc-stack
       region: "{{ ansible_facts.ec2_placement_region }}"
   register: eks_info
+  tags: deploy
+
+- name: "Gather facts as Jenkins user"
+  become: yes
+  become_user: jenkins
+  setup:
   tags: deploy
 
 - name: "Create kubeconfig config directory"
