@@ -73,6 +73,19 @@
   when: cred_helper.stat.exists == 'false'
   tags: setup
 
+- name: "Check if aws-iam-authenticator exists"
+  stat:
+    path: /usr/local/bin/aws-iam-authenticator
+  register: iam_authenticator
+  tags: setup
+
+- name: "Install aws-iam-authenticator"
+  get_url:
+    url: https://amazon-eks.s3.us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/linux/amd64/aws-iam-authenticator
+    dest: /usr/local/bin/aws-iam-authenticator
+    mode: '0755'
+  tags: setup
+
 - name: "Update facts"
   become: yes
   become_user: jenkins
