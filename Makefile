@@ -29,4 +29,4 @@ push:
 deploy:
 	#k8s cluster deploy
 	. ~/.microblog/bin/activate && \
-	ansible-playbook -i ansible/buildserver ansible/site.yml --deploy push
+	ansible-playbook -i ansible/buildserver ansible/site.yml --tags deploy
