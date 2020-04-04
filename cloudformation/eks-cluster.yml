@@ -76,3 +76,6 @@ Outputs:
         Value: !GetAtt EKSCluster.Endpoint
         Export:
             Name: !Sub "${AWS::StackName}-ClusterEndpoint"
+    ClusterCA:
+        Description: Cluster Certificate Authority
+        Value: !GetAtt EKSCluster.CertificateAuthorityData
