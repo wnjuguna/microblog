@@ -186,7 +186,7 @@
       state: directory
       owner: jenkins
       group: jenkins
-      mode: '0644'
+      mode: '0755'
   tags: deploy
 
 - name: "Deploy KubeConfig"
