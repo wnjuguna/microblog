@@ -162,3 +162,10 @@
     push: yes
     source: local
   tags: push
+
+- name: "Gather EKS stack info"
+  cloudformation_info:
+      stack_name: microblog-eks
+      region: "{{ ansible_facts.ec2_placement_region }}"
+  register: eks_info
+  tags: deploy
