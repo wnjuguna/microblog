@@ -25,3 +25,8 @@ push:
 	#Push docker image to ECR repository
 	. ~/.microblog/bin/activate && \
 	ansible-playbook -i ansible/buildserver ansible/site.yml --tags push
+
+deploy:
+	#k8s cluster deploy
+	. ~/.microblog/bin/activate && \
+	ansible-playbook -i ansible/buildserver ansible/site.yml --deploy push
