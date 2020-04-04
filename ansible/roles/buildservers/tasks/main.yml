@@ -200,6 +200,23 @@
       stack_outputs: "{{ stack_outputs | combine(eks_cluster['stack_outputs']) }}"
   tags: deploy
 
+- name: Create k8s nodegroup
+  cloudformation:
+      stack_name: microblog-cluster-stack
+      template: roles/buildservers/files/cloudformation/eks-nodegroup.yml
+      region: "{{ ansible_facts.ec2_placement_region }}"
+      state: present
+      template_parameters:
+          ClusterName: eks-microblog
+          ASGSubnets: "{{ stack_outputs.Subnets }}"
+  register: eks_nodegroup
+  tags: deploy
+
+- name: "Updating stack outputs"
+  set_fact:
+      stack_outputs: "{{ stack_outputs | combine(eks_nodegroup['stack_outputs']) }}"
+  tags: deploy
+
 - name: "Gather EKS stack info"
   cloudformation_info:
       stack_name: microblog-vpc-stack
