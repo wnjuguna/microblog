@@ -202,7 +202,7 @@
 
 - name: Create k8s nodegroup
   cloudformation:
-      stack_name: microblog-cluster-stack
+      stack_name: microblog-nodegroup-stack
       template: roles/buildservers/files/cloudformation/eks-nodegroup.yml
       region: "{{ ansible_facts.ec2_placement_region }}"
       state: present
