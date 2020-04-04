@@ -212,11 +212,6 @@
   register: eks_nodegroup
   tags: deploy
 
-- name: "Updating stack outputs"
-  set_fact:
-      stack_outputs: "{{ stack_outputs | combine(eks_nodegroup['stack_outputs']) }}"
-  tags: deploy
-
 - name: "Gather EKS stack info"
   cloudformation_info:
       stack_name: microblog-vpc-stack
