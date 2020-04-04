@@ -169,7 +169,7 @@
   cloudformation:
       stack_name: microblog-vpc-stack
       template: roles/buildservers/files/cloudformation/vpc.yml
-      role_arn: "{{ ansible_facts.ec2_iam_info_instanceprofilearn | regex_replace("instance-profile", "role") }}"
+      role_arn: "{{ ansible_facts.ec2_iam_info_instanceprofilearn | regex_replace('instance-profile', 'role') }}"
       region: "{{ ansible_facts.ec2_placement_region }}"
       state: present
       template_parameters:
