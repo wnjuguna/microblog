@@ -178,6 +178,17 @@
   register: eks_info
   tags: deploy
 
+- name: "Create kubeconfig config directory"
+  become: yes
+  become_user: jenkins
+  file:
+      path: "{{ ansible_user_dir + './kube' }}"
+      state: directory
+      owner: jenkins
+      group: jenkins
+      mode: '0644'
+  tags: deploy
+
 - name: "Deploy KubeConfig"
   become: yes
   become_user: jenkins
