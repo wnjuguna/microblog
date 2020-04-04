@@ -182,7 +182,7 @@
   become: yes
   become_user: jenkins
   file:
-      path: "{{ ansible_user_dir + './kube' }}"
+      path: "{{ ansible_user_dir + '/.kube' }}"
       state: directory
       owner: jenkins
       group: jenkins
