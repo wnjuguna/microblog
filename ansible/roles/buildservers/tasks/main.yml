@@ -194,7 +194,7 @@
   become_user: jenkins
   template:
       src: kubeconfig.j2
-      dest: "{{ ansible_user_dir + './kube/kubeconfig' }}"
+      dest: "{{ ansible_user_dir + '/.kube/kubeconfig' }}"
       owner: jenkins
       group: jenkins
       mode: '0644'
