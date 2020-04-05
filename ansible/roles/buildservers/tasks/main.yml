@@ -159,7 +159,9 @@
     - deploy
 
 - name: Push image to ECR.
-  command: "{{ 'docker push'+ ecr_repo.repository.repositoryUri + ':latest' }}"
+  become: yes
+  become_user: jenkins
+  command: "{{ 'docker push '+ ecr_repo.repository.repositoryUri + ':latest' }}"
   register: push_result
   changed_when: true
   until: push_result is success
