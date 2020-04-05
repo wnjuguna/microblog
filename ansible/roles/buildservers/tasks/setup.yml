@@ -90,6 +90,19 @@
     mode: '0755'
   tags: setup
 
+- name: "Check if kubectl exists"
+  stat:
+    path: /usr/local/bin/kubectl
+  register: kubectl
+  tags: setup
+
+- name: "Install kubectl"
+  get_url:
+    url: https://amazon-eks.s3.us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/linux/amd64/kubectl
+    dest: /usr/local/bin/kubectl
+    mode: '0755'
+  tags: setup
+
 - name: "Update facts"
   become: yes
   become_user: jenkins
