@@ -5,6 +5,7 @@
       - python3-apt
       - python3-docker
       - python3-boto3
+      - python-pip
       - golang-go
       - apt-transport-https
       - ca-certificates
@@ -13,6 +14,11 @@
       - software-properties-common
     state: present
     update_cache: yes
+  tags: setup
+
+- name: "Install python openshift client"
+  pip:
+    name: openshift
   tags: setup
 
 - name: "Add Docker repo key to apt"
