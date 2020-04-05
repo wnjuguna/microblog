@@ -1,0 +1,38 @@
+apiVersion: v1
+items:
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: microblog-app
+    name: microblog-app
+  spec:
+    replicas: 4
+    selector:
+      matchLabels:
+        app: microblog-app
+    template:
+      metadata:
+        labels:
+          app: microblog-app
+      spec:
+        containers:
+        - image: "{{ ecr_repo.repository.repositoryUri + ':latest' }}"
+          name: microblog
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: microblog-app
+    name: microblog-service
+    namespace: default
+  spec:
+    externalTrafficPolicy: Cluster
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 5000
+    selector:
+      app: microblog-app
+    type: LoadBalancer
+kind: List
