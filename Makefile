@@ -6,6 +6,7 @@ setup:
 	pip install ansible && \
 	pip install ansible-lint && \
 	pip install cfn-lint && \
+	pip install openshift && \
 	pip install -r src/requirements.txt && \
 	ansible-playbook -vv -i ansible/buildserver ansible/site.yml --tags setup
 
