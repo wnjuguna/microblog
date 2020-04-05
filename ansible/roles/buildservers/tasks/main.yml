@@ -154,7 +154,9 @@
     state: present
     region: "{{ ansible_facts.ec2_placement_region }}"
   register: ecr_repo
-  tags: push
+  tags:
+    - push
+    - deploy
 
 - name: "Push image to ECR"
   docker_image:
@@ -245,4 +247,10 @@
       owner: jenkins
       group: jenkins
       mode: '0644'
+  tags: deploy
+
+- name: "Create K8s deployment"
+  k8s:
+    state: Present
+    src: "{{ lookup('template', 'roles/buildservers/templates/k8s/microblog-app.yml') }}"
   tags: deploy
