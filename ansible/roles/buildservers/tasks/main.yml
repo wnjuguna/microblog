@@ -158,13 +158,13 @@
     - push
     - deploy
 
-- name: "Push image to ECR"
-  docker_image:
-    repository: "{{ ecr_repo.repository.repositoryUri }}"
-    name: microblog
-    tag: latest
-    push: yes
-    source: local
+- name: Push image to ECR.
+  command: 'docker push' "{{ ecr_repo.repository.repositoryUri + ':latest' }}"
+  register: push_result
+  changed_when: true
+  until: push_result is success
+  retries: 10
+  delay: 2
   tags: push
 
 - name: Create k8s VPC
