@@ -1,0 +1,43 @@
+- name: "Get EC2 metadata facts"
+  ec2_metadata_facts:
+  tags:
+    - push
+    - deploy
+
+- name: "Build microblog docker image"
+  docker_image:
+    name: microblog
+    tag: latest
+    source: build
+    state: present
+    build:
+      path: ../
+      pull: yes
+  tags: build
+
+- name: "Create ECR repository"
+  ecs_ecr:
+    aws_access_key: "{{ ansible_facts['ec2_iam_security_credentials_' + ansible_facts['ec2_iam_instance_profile_role']\
+    | regex_replace('-','_') + '_accesskeyid'] }}"
+    aws_secret_key: "{{ ansible_facts['ec2_iam_security_credentials_' + ansible_facts['ec2_iam_instance_profile_role']\
+    | regex_replace('-','_') + '_secretaccesskey'] }}"
+    security_token: "{{ ansible_facts['ec2_iam_security_credentials_' + ansible_facts['ec2_iam_instance_profile_role']\
+    | regex_replace('-','_') + '_token'] }}"
+    name: udacity/microblog
+    state: present
+    region: "{{ ansible_facts.ec2_placement_region }}"
+  register: ecr_repo
+  tags:
+    - push
+    - deploy
+
+- name: Push image to ECR.
+  become: yes
+  become_user: jenkins
+  command: "{{ 'docker push '+ ecr_repo.repository.repositoryUri + ':latest' }}"
+  register: push_result
+  changed_when: true
+  until: push_result is success
+  retries: 10
+  delay: 2
+  tags: push

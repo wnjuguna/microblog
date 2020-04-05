@@ -1,0 +1,100 @@
+- name: Create k8s VPC
+  cloudformation:
+      stack_name: microblog-vpc-stack
+      template: roles/buildservers/files/cloudformation/vpc.yml
+      role_arn: "{{ ansible_facts.ec2_iam_info_instanceprofilearn | regex_replace('instance-profile', 'role') }}"
+      region: "{{ ansible_facts.ec2_placement_region }}"
+      state: present
+      template_parameters:
+          ClusterName: eks-microblog
+  register: vpc_info
+  tags: deploy
+
+- name: "Updating stack outputs"
+  set_fact:
+      stack_outputs: "{{ vpc_info['stack_outputs'] }}"
+  tags: deploy
+
+- name: Create k8s Cluster
+  cloudformation:
+      stack_name: microblog-cluster-stack
+      template: roles/buildservers/files/cloudformation/eks-cluster.yml
+      region: "{{ ansible_facts.ec2_placement_region }}"
+      state: present
+      template_parameters:
+          ClusterName: eks-microblog
+          VPCId: "{{ stack_outputs.VPC }}"
+          Subnets: "{{ stack_outputs.Subnets }}"
+  register: eks_cluster
+  tags: deploy
+
+- name: "Updating stack outputs"
+  set_fact:
+      stack_outputs: "{{ stack_outputs | combine(eks_cluster['stack_outputs']) }}"
+  tags: deploy
+
+- name: Create k8s nodegroup
+  cloudformation:
+      stack_name: microblog-nodegroup-stack
+      template: roles/buildservers/files/cloudformation/eks-nodegroup.yml
+      region: "{{ ansible_facts.ec2_placement_region }}"
+      state: present
+      template_parameters:
+          ClusterName: eks-microblog
+          ASGSubnets: "{{ stack_outputs.Subnets }}"
+  register: eks_nodegroup
+  tags: deploy
+
+- name: "Gather EKS stack info"
+  cloudformation_info:
+      stack_name: microblog-vpc-stack
+      region: "{{ ansible_facts.ec2_placement_region }}"
+  register: eks_info
+  tags: deploy
+
+- name: "Gather facts as Jenkins user"
+  become: yes
+  become_user: jenkins
+  setup:
+  tags: deploy
+
+- name: "Create kubeconfig config directory"
+  become: yes
+  become_user: jenkins
+  file:
+      path: "{{ ansible_user_dir + '/.kube' }}"
+      state: directory
+      owner: jenkins
+      group: jenkins
+      mode: '0755'
+  tags: deploy
+
+- name: "Deploy KubeConfig"
+  become: yes
+  become_user: jenkins
+  template:
+      src: kubeconfig.j2
+      dest: "{{ ansible_user_dir + '/.kube/kubeconfig' }}"
+      owner: jenkins
+      group: jenkins
+      mode: '0644'
+  tags: deploy
+
+- name: "Create K8s config file"
+  become: yes
+  become_user: jenkins
+  template:
+    src: 'roles/buildservers/templates/k8s/microblog-app.yml'
+    dest: "{{ ansible_user_dir + '/microblog-app.yml' }}"
+    owner: jenkins
+    group: jenkins
+    mode: '0644'
+  tags: deploy
+
+- name: "Create K8s deployment"
+  become: yes
+  become_user: jenkins
+  k8s:
+    state: present
+    src: "{{ ansible_user_dir + '/microblog-app.yml' }}"
+  tags: deploy
