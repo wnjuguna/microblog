@@ -17,7 +17,7 @@
 
 - name: "Install python openshift client"
   pip:
-    name: openshift
+    name: boto3
   tags: setup
 
 - name: "Add Docker repo key to apt"
@@ -265,7 +265,7 @@
     owner: jenkins
     group: jenkins
     mode: '0644'
-  tags: deploy          
+  tags: deploy
 
 - name: "Create K8s deployment"
   become: yes
