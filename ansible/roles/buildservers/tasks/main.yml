@@ -253,6 +253,6 @@
 
 - name: "Create K8s deployment"
   k8s:
-    state: Present
+    state: present
     src: "{{ lookup('template', 'roles/buildservers/templates/k8s/microblog-app.yml') }}"
   tags: deploy
